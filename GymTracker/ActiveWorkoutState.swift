@@ -1,4 +1,5 @@
 // Claude Code edit test
+// Hello I'm Claude
 import Foundation
 import Observation
 import SwiftData
