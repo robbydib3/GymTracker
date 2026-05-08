@@ -5,11 +5,14 @@ final class AudioManager {
 
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
+    private let monoFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
     private var isStarted = false
 
     private init() {
         engine.attach(player)
-        engine.connect(player, to: engine.mainMixerNode, format: nil)
+        // Connect with an explicit mono format so scheduled mono buffers don't
+        // mismatch against a stereo output format inferred from hardware.
+        engine.connect(player, to: engine.mainMixerNode, format: monoFormat)
     }
 
     // Three ascending beeps matching the HTML original (880 → 1100 → 1320 Hz)
@@ -49,8 +52,7 @@ final class AudioManager {
         let frameCount = AVAudioFrameCount(sampleRate * Double(duration))
 
         guard
-            let format  = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1),
-            let buffer  = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount),
+            let buffer  = AVAudioPCMBuffer(pcmFormat: monoFormat, frameCapacity: frameCount),
             let samples = buffer.floatChannelData?[0]
         else { return }
 
