@@ -1,6 +1,8 @@
+// Claude Code edit test
 import Foundation
 import Observation
 import SwiftData
+import UserNotifications
 
 // MARK: - Value types (in-memory only, never persisted)
 
@@ -34,6 +36,7 @@ final class ActiveWorkoutState {
     // UI state
     var elapsedSeconds    = 0
     var restTimerSeconds: Int?   // non-nil while rest timer is showing
+    var timerEndDate:     Date?  // absolute end time; source of truth for background-safe countdown
     var isTimerMinimized  = false
     var showToast         = false
     var showExercisePicker = false
@@ -69,8 +72,12 @@ final class ActiveWorkoutState {
 
     func completeSet(exIndex: Int, setIndex: Int) {
         exercises[exIndex].sets[setIndex].isDone = true
-        restTimerSeconds  = exercises[exIndex].restSeconds
+        let rest          = exercises[exIndex].restSeconds
+        restTimerSeconds  = rest
+        let end           = Date().addingTimeInterval(Double(rest))
+        timerEndDate      = end
         isTimerMinimized  = false
+        scheduleTimerNotification(at: end)
     }
 
     func updateWeight(exIndex: Int, setIndex: Int, to value: Double) {
@@ -108,7 +115,9 @@ final class ActiveWorkoutState {
     }
 
     func dismissTimer() {
+        cancelTimerNotification()
         restTimerSeconds = nil
+        timerEndDate     = nil
         isTimerMinimized = false
         showToast        = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
@@ -148,6 +157,24 @@ final class ActiveWorkoutState {
         }
 
         return log
+    }
+
+    // MARK: - Notifications
+
+    private func scheduleTimerNotification(at endDate: Date) {
+        let content       = UNMutableNotificationContent()
+        content.title     = "Rest Complete"
+        content.body      = "Time to start your next set!"
+        content.sound     = .default
+        let delay         = max(1, endDate.timeIntervalSinceNow)
+        let trigger       = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
+        let request       = UNNotificationRequest(identifier: "rest-timer", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    private func cancelTimerNotification() {
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: ["rest-timer"])
     }
 
     // MARK: - Cleanup

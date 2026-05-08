@@ -66,9 +66,10 @@ struct ActiveWorkoutView: View {
         }
         // Rest timer overlay
         .overlay {
-            if let totalSec = state.restTimerSeconds {
+            if let totalSec = state.restTimerSeconds, let endDate = state.timerEndDate {
                 RestTimerView(
                     totalSeconds: totalSec,
+                    endDate:      endDate,
                     isMinimized:  $state.isTimerMinimized,
                     onDone:       { state.dismissTimer() }
                 )

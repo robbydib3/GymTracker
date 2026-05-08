@@ -2,18 +2,22 @@ import SwiftUI
 
 struct RestTimerView: View {
     let totalSeconds: Int
+    let endDate: Date
     @Binding var isMinimized: Bool
     let onDone: () -> Void
 
+    // Local adjusted end date so +/-15s buttons work without touching state
+    @State private var adjustedEndDate: Date
     @State private var remaining: Int
     @State private var doneFired = false
 
-
-    init(totalSeconds: Int, isMinimized: Binding<Bool>, onDone: @escaping () -> Void) {
-        self.totalSeconds  = totalSeconds
-        self._isMinimized  = isMinimized
-        self.onDone        = onDone
-        self._remaining    = State(initialValue: totalSeconds)
+    init(totalSeconds: Int, endDate: Date, isMinimized: Binding<Bool>, onDone: @escaping () -> Void) {
+        self.totalSeconds      = totalSeconds
+        self.endDate           = endDate
+        self._isMinimized      = isMinimized
+        self.onDone            = onDone
+        self._adjustedEndDate  = State(initialValue: endDate)
+        self._remaining        = State(initialValue: max(0, Int(endDate.timeIntervalSinceNow)))
     }
 
     // MARK: - Body
@@ -30,6 +34,15 @@ struct RestTimerView: View {
             while !doneFired, !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
                 tick()
+            }
+        }
+        // Immediately correct remaining time when app returns to foreground
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            remaining = max(0, Int(adjustedEndDate.timeIntervalSinceNow))
+            if remaining == 0, !doneFired {
+                doneFired = true
+                AudioManager.shared.timerDone()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { onDone() }
             }
         }
     }
@@ -125,8 +138,8 @@ struct RestTimerView: View {
 
             // Adjust buttons
             HStack(spacing: 12) {
-                adjustButton(label: "-15s") { remaining = max(0, remaining - 15) }
-                adjustButton(label: "+15s") { remaining += 15 }
+                adjustButton(label: "-15s") { adjustedEndDate = adjustedEndDate.addingTimeInterval(-15) }
+                adjustButton(label: "+15s") { adjustedEndDate = adjustedEndDate.addingTimeInterval(15) }
             }
 
             // Skip
@@ -169,8 +182,8 @@ struct RestTimerView: View {
     }
 
     private func tick() {
-        guard !doneFired, remaining > 0 else { return }
-        remaining -= 1
+        guard !doneFired else { return }
+        remaining = max(0, Int(adjustedEndDate.timeIntervalSinceNow))
         if remaining == 0 {
             doneFired = true
             AudioManager.shared.timerDone()
