@@ -1,3 +1,4 @@
+// Claude Code edit test
 import Foundation
 import Observation
 import SwiftData
