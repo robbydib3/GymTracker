@@ -71,7 +71,8 @@ struct ActiveWorkoutView: View {
                     totalSeconds: totalSec,
                     endDate:      endDate,
                     isMinimized:  $state.isTimerMinimized,
-                    onDone:       { state.dismissTimer() }
+                    onDone:       { state.dismissTimer() },
+                    onAdjust:     { state.adjustTimerEndDate($0) }
                 )
                 .transition(.opacity)
             }
