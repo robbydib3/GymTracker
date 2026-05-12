@@ -1,32 +1,47 @@
 import SwiftUI
+import UIKit
+
+// MARK: - UIColor hex helper
+
+private extension UIColor {
+    convenience init(hex: String) {
+        let h = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: h).scanHexInt64(&int)
+        let r = CGFloat((int >> 16) & 0xFF) / 255
+        let g = CGFloat((int >> 8)  & 0xFF) / 255
+        let b = CGFloat(int & 0xFF)         / 255
+        self.init(red: r, green: g, blue: b, alpha: 1)
+    }
+}
 
 // MARK: - App color palette
 
 extension Color {
     // Backgrounds
-    static let appBackground    = Color(hex: "0f0f0f")
-    static let cardBackground   = Color(hex: "1a1a1a")
-    static let inputBackground  = Color(hex: "2a2a2a")
-    static let rowBackground    = Color(hex: "222222")
+    static let appBackground   = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "0f0f0f") : UIColor(hex: "f5f5f5") })
+    static let cardBackground  = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "1a1a1a") : UIColor(hex: "ffffff") })
+    static let inputBackground = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "2a2a2a") : UIColor(hex: "ebebeb") })
+    static let rowBackground   = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "222222") : UIColor(hex: "f0f0f0") })
 
     // Borders
-    static let cardBorder       = Color(hex: "2a2a2a")
-    static let inputBorder      = Color(hex: "3a3a3a")
+    static let cardBorder      = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "2a2a2a") : UIColor(hex: "dddddd") })
+    static let inputBorder     = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "3a3a3a") : UIColor(hex: "cccccc") })
 
     // Text
-    static let textPrimary      = Color(hex: "f5f5f5")
-    static let textSecondary    = Color(hex: "a0a0a0")
-    static let textMuted        = Color(hex: "666666")
+    static let textPrimary     = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "f5f5f5") : UIColor(hex: "111111") })
+    static let textSecondary   = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "a0a0a0") : UIColor(hex: "555555") })
+    static let textMuted       = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "666666") : UIColor(hex: "888888") })
 
-    // Accent
-    static let gymOrange        = Color(hex: "f97316")
-    static let gymOrangeLight   = Color(hex: "fb923c")
+    // Accent (same in both modes)
+    static let gymOrange       = Color(hex: "f97316")
+    static let gymOrangeLight  = Color(hex: "fb923c")
 
     // Semantic
-    static let completedGreen   = Color(hex: "22c55e")
-    static let completedBg      = Color(hex: "0d2218")
-    static let completedInput   = Color(hex: "1f2f1f")
-    static let destructiveRed   = Color(hex: "ef4444")
+    static let completedGreen  = Color(hex: "22c55e")
+    static let completedBg     = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "0d2218") : UIColor(hex: "e8f5ee") })
+    static let completedInput  = Color(uiColor: UIColor { tc in tc.userInterfaceStyle == .dark ? UIColor(hex: "1f2f1f") : UIColor(hex: "d4edd9") })
+    static let destructiveRed  = Color(hex: "ef4444")
 
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

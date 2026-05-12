@@ -35,11 +35,14 @@ struct ContentView: View {
                     ProgressChartView()
                         .tabItem { Label("Progress",  systemImage: "chart.xyaxis.line") }
                         .tag(3)
+
+                    SettingsView()
+                        .tabItem { Label("Settings",  systemImage: "gearshape") }
+                        .tag(4)
                 }
                 .tint(.gymOrange)
             }
         }
-        .preferredColorScheme(.dark)
         .animation(.easeInOut(duration: 0.2), value: activeWorkout == nil)
     }
 
@@ -88,7 +91,6 @@ struct HomeView: View {
             .navigationTitle("GymTracker")
             .navigationBarTitleDisplayMode(.large)
         }
-        .preferredColorScheme(.dark)
     }
 
     // MARK: Unit toggle
@@ -248,7 +250,6 @@ struct HistoryView: View {
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.large)
         }
-        .preferredColorScheme(.dark)
     }
 
     private func logRow(_ log: WorkoutLog) -> some View {
@@ -402,7 +403,6 @@ struct ProgressChartView: View {
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.large)
         }
-        .preferredColorScheme(.dark)
     }
 
     private var exerciseSelector: some View {

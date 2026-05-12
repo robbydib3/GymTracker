@@ -77,7 +77,6 @@ struct TemplatesView: View {
                 )
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private var emptyState: some View {
@@ -284,7 +283,6 @@ struct TemplateEditorView: View {
                 )
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     // Saves to SwiftData — delete + recreate exercises for simplicity
@@ -519,7 +517,6 @@ struct ExercisePickerView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
     }
 
     private var pickerList: some View {
