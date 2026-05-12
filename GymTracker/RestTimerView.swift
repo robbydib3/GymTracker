@@ -5,17 +5,20 @@ struct RestTimerView: View {
     let endDate: Date
     @Binding var isMinimized: Bool
     let onDone: () -> Void
+    let onAdjust: (Date) -> Void
 
     // Local adjusted end date so +/-15s buttons work without touching state
     @State private var adjustedEndDate: Date
     @State private var remaining: Int
     @State private var doneFired = false
 
-    init(totalSeconds: Int, endDate: Date, isMinimized: Binding<Bool>, onDone: @escaping () -> Void) {
+    init(totalSeconds: Int, endDate: Date, isMinimized: Binding<Bool>,
+         onDone: @escaping () -> Void, onAdjust: @escaping (Date) -> Void) {
         self.totalSeconds      = totalSeconds
         self.endDate           = endDate
         self._isMinimized      = isMinimized
         self.onDone            = onDone
+        self.onAdjust          = onAdjust
         self._adjustedEndDate  = State(initialValue: endDate)
         self._remaining        = State(initialValue: max(0, Int(endDate.timeIntervalSinceNow)))
     }
@@ -138,8 +141,14 @@ struct RestTimerView: View {
 
             // Adjust buttons
             HStack(spacing: 12) {
-                adjustButton(label: "-15s") { adjustedEndDate = adjustedEndDate.addingTimeInterval(-15) }
-                adjustButton(label: "+15s") { adjustedEndDate = adjustedEndDate.addingTimeInterval(15) }
+                adjustButton(label: "-15s") {
+                    adjustedEndDate = adjustedEndDate.addingTimeInterval(-15)
+                    onAdjust(adjustedEndDate)
+                }
+                adjustButton(label: "+15s") {
+                    adjustedEndDate = adjustedEndDate.addingTimeInterval(15)
+                    onAdjust(adjustedEndDate)
+                }
             }
 
             // Skip

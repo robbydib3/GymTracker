@@ -1,5 +1,6 @@
 // Claude Code edit test
 // Hello I'm Claude
+import ActivityKit
 import Foundation
 import Observation
 import SwiftData
@@ -40,6 +41,7 @@ final class ActiveWorkoutState {
     var timerEndDate:     Date?  // absolute end time; source of truth for background-safe countdown
     var isTimerMinimized  = false
     var showToast         = false
+    private var _currentActivity: AnyObject?  // type-erased Activity<RestTimerAttributes>
     var showExercisePicker = false
 
     let startedAt = Date()
@@ -79,6 +81,9 @@ final class ActiveWorkoutState {
         timerEndDate      = end
         isTimerMinimized  = false
         scheduleTimerNotification(at: end)
+        if #available(iOS 16.2, *) {
+            startLiveActivity(exerciseName: exercises[exIndex].exerciseName, endDate: end, totalSeconds: rest)
+        }
     }
 
     func updateWeight(exIndex: Int, setIndex: Int, to value: Double) {
@@ -117,6 +122,7 @@ final class ActiveWorkoutState {
 
     func dismissTimer() {
         cancelTimerNotification()
+        if #available(iOS 16.2, *) { endLiveActivity() }
         restTimerSeconds = nil
         timerEndDate     = nil
         isTimerMinimized = false
@@ -178,11 +184,52 @@ final class ActiveWorkoutState {
             .removePendingNotificationRequests(withIdentifiers: ["rest-timer"])
     }
 
+    // MARK: - Live Activity (iOS 16.2+)
+
+    func adjustTimerEndDate(_ newEndDate: Date) {
+        timerEndDate = newEndDate
+        if #available(iOS 16.2, *) {
+            updateLiveActivity(endDate: newEndDate, totalSeconds: restTimerSeconds ?? 60)
+        }
+    }
+
+    @available(iOS 16.2, *)
+    private func startLiveActivity(exerciseName: String, endDate: Date, totalSeconds: Int) {
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        if let old = _currentActivity as? Activity<RestTimerAttributes> {
+            Task { await old.end(nil, dismissalPolicy: .immediate) }
+        }
+        let attrs   = RestTimerAttributes(exerciseName: exerciseName)
+        let state   = RestTimerAttributes.ContentState(endDate: endDate, totalSeconds: totalSeconds)
+        let content = ActivityContent(state: state, staleDate: endDate.addingTimeInterval(10))
+        do {
+            _currentActivity = try Activity<RestTimerAttributes>.request(
+                attributes: attrs, content: content, pushType: nil
+            )
+        } catch { }
+    }
+
+    @available(iOS 16.2, *)
+    private func updateLiveActivity(endDate: Date, totalSeconds: Int) {
+        guard let activity = _currentActivity as? Activity<RestTimerAttributes> else { return }
+        let state   = RestTimerAttributes.ContentState(endDate: endDate, totalSeconds: totalSeconds)
+        let content = ActivityContent(state: state, staleDate: endDate.addingTimeInterval(10))
+        Task { await activity.update(content) }
+    }
+
+    @available(iOS 16.2, *)
+    private func endLiveActivity() {
+        guard let activity = _currentActivity as? Activity<RestTimerAttributes> else { return }
+        _currentActivity = nil
+        Task { await activity.end(nil, dismissalPolicy: .immediate) }
+    }
+
     // MARK: - Cleanup
 
     func stop() {
         elapsedTimer?.invalidate()
         elapsedTimer = nil
+        if #available(iOS 16.2, *) { endLiveActivity() }
     }
 
     private func startElapsedTimer() {
