@@ -55,6 +55,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				RestTimerAttributes.swift,
+				SetDone.wav,
 			);
 			target = BF0D2A3F2FB15AAC00C691E5 /* GymTrackerWidgetExtension */;
 		};

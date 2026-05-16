@@ -75,6 +75,7 @@ final class ActiveWorkoutState {
 
     func completeSet(exIndex: Int, setIndex: Int) {
         exercises[exIndex].sets[setIndex].isDone = true
+        AudioManager.shared.setDone()
         let rest          = exercises[exIndex].restSeconds
         restTimerSeconds  = rest
         let end           = Date().addingTimeInterval(Double(rest))

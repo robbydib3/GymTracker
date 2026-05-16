@@ -7,12 +7,20 @@ final class AudioManager {
     private let player = AVAudioPlayerNode()
     private let monoFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
     private var isStarted = false
+    private var setDonePlayer: AVAudioPlayer?
 
     private init() {
         engine.attach(player)
         // Connect with an explicit mono format so scheduled mono buffers don't
         // mismatch against a stereo output format inferred from hardware.
         engine.connect(player, to: engine.mainMixerNode, format: monoFormat)
+    }
+
+    func setDone() {
+        startEngine()
+        guard let url = Bundle.main.url(forResource: "SetDone", withExtension: "wav") else { return }
+        setDonePlayer = try? AVAudioPlayer(contentsOf: url)
+        setDonePlayer?.play()
     }
 
     // Three ascending beeps matching the HTML original (880 → 1100 → 1320 Hz)
