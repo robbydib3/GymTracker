@@ -6,6 +6,7 @@ import Charts
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query private var customExercises: [CustomExercise]
     @State private var activeWorkout: ActiveWorkoutState? = nil
     @State private var selectedTab = 0
 
@@ -44,6 +45,7 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: activeWorkout == nil)
+        .onAppear { customExercises.forEach { ExerciseData.register($0.asExerciseInfo) } }
     }
 
     private func startWorkout(_ template: WorkoutTemplate) {
