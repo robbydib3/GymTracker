@@ -99,10 +99,14 @@ private struct RestTimerLockScreenView: View {
             ZStack {
                 Circle()
                     .stroke(.white.opacity(0.15), lineWidth: 5)
-                Circle()
-                    .trim(from: 0, to: progressFraction)
-                    .stroke(gymOrange, style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
+                TimelineView(.animation) { context in
+                    let remaining = max(0, endDate.timeIntervalSince(context.date))
+                    let fraction = totalSeconds > 0 ? remaining / Double(totalSeconds) : 0
+                    Circle()
+                        .trim(from: 0, to: fraction)
+                        .stroke(gymOrange, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
                 Text(endDate, style: .timer)
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .monospacedDigit()
@@ -114,12 +118,6 @@ private struct RestTimerLockScreenView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-    }
-
-    private var progressFraction: Double {
-        guard totalSeconds > 0 else { return 0 }
-        let remaining = max(0, endDate.timeIntervalSinceNow)
-        return remaining / Double(totalSeconds)
     }
 }
 

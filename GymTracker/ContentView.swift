@@ -81,7 +81,6 @@ struct HomeView: View {
                 Color.appBackground.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        unitToggle.padding(.top, 4)
                         quickStart
                         recentWorkouts
                     }
@@ -90,32 +89,6 @@ struct HomeView: View {
             }
             .navigationTitle("GymTracker")
             .navigationBarTitleDisplayMode(.large)
-        }
-    }
-
-    // MARK: Unit toggle
-
-    private var unitToggle: some View {
-        HStack {
-            Spacer()
-            HStack(spacing: 0) {
-                ForEach(["kg", "lb"], id: \.self) { u in
-                    Button {
-                        unit = u
-                    } label: {
-                        Text(u.uppercased())
-                            .font(.caption.weight(.bold))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 6)
-                            .background(unit == u ? Color.gymOrange : Color.clear)
-                            .foregroundStyle(unit == u ? .white : Color.textSecondary)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-            .padding(3)
-            .background(Color.inputBackground)
-            .clipShape(Capsule())
         }
     }
 

@@ -10,7 +10,10 @@ struct ActiveWorkoutView: View {
     @Query private var customExercises: [CustomExercise]
     @AppStorage("gym_unit") private var unit = "kg"
 
-    @State private var showDiscardAlert = false
+    @State private var showDiscardAlert   = false
+    @State private var showConverter      = false
+    @State private var converterInput     = ""
+    @State private var converterFromKg    = true
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -19,6 +22,7 @@ struct ActiveWorkoutView: View {
             VStack(spacing: 0) {
                 header
                 progressBar
+                converterBar
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(state.exercises.indices, id: \.self) { i in
@@ -101,6 +105,66 @@ struct ActiveWorkoutView: View {
         }
         .onAppear  { UIApplication.shared.isIdleTimerDisabled = true  }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+    }
+
+    // MARK: - Converter
+
+    private var converterBar: some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { showConverter.toggle() }
+            } label: {
+                HStack {
+                    Image(systemName: "scalemass")
+                        .foregroundStyle(Color.gymOrange)
+                    Text("Convert kg ↔ lb")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color.textSecondary)
+                    Spacer()
+                    Image(systemName: showConverter ? "chevron.up" : "chevron.down")
+                        .font(.caption)
+                        .foregroundStyle(Color.textMuted)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+            }
+
+            if showConverter {
+                VStack(spacing: 10) {
+                    Picker("", selection: $converterFromKg) {
+                        Text("KG → LB").tag(true)
+                        Text("LB → KG").tag(false)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 16)
+
+                    HStack {
+                        TextField("Enter \(converterFromKg ? "kg" : "lb")", text: $converterInput)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: 120)
+                        Image(systemName: "arrow.right")
+                            .foregroundStyle(Color.textMuted)
+                        Text(converterResult)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.gymOrange)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            Divider()
+        }
+        .background(Color.cardBackground)
+    }
+
+    private var converterResult: String {
+        guard let value = Double(converterInput), value > 0 else { return "—" }
+        let converted = converterFromKg ? value * 2.20462 : value / 2.20462
+        let unit = converterFromKg ? "lb" : "kg"
+        return String(format: "%.1f \(unit)", converted)
     }
 
     // MARK: - Header
