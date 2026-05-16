@@ -207,7 +207,7 @@ struct HistoryView: View {
                     List {
                         ForEach(logs) { log in
                             logRow(log)
-                                .listRowBackground(Color.cardBackground)
+                                .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                                 .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                         }
@@ -298,6 +298,7 @@ struct HistoryView: View {
                 .padding(12)
             }
         }
+        .background(Color.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.cardBorder, lineWidth: 1))
     }

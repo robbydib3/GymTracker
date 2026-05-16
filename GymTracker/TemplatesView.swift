@@ -103,11 +103,13 @@ struct TemplatesView: View {
         try? modelContext.save()
     }
 
-    private func addCustomExercise(name: String, category: String) {
+    @discardableResult
+    private func addCustomExercise(name: String, category: String) -> ExerciseInfo {
         let ex = CustomExercise(name: name, category: category)
         modelContext.insert(ex)
         ExerciseData.register(ex.asExerciseInfo)
         try? modelContext.save()
+        return ex.asExerciseInfo
     }
 }
 
@@ -186,7 +188,7 @@ struct TemplateEditorView: View {
     let template:        WorkoutTemplate?
     let customExercises: [ExerciseInfo]
     let unit:            String
-    let onAddCustom:     (String, String) -> Void
+    let onAddCustom:     (String, String) -> ExerciseInfo
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss)      private var dismiss
@@ -199,7 +201,7 @@ struct TemplateEditorView: View {
         template: WorkoutTemplate?,
         customExercises: [ExerciseInfo],
         unit: String,
-        onAddCustom: @escaping (String, String) -> Void
+        onAddCustom: @escaping (String, String) -> ExerciseInfo
     ) {
         self.template        = template
         self.customExercises = customExercises
@@ -275,9 +277,7 @@ struct TemplateEditorView: View {
                         ))
                     },
                     onAddCustom: { name, cat in
-                        onAddCustom(name, cat)
-                        let id = "custom_" + UUID().uuidString.prefix(8)
-                        let info = ExerciseInfo(id: id, name: name, category: cat, isCustom: true)
+                        let info = onAddCustom(name, cat)
                         exercises.append(EditableExercise(exerciseId: info.id, sets: [EditableSet()]))
                     }
                 )

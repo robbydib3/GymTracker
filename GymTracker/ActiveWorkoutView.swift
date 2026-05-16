@@ -238,16 +238,6 @@ struct ActiveWorkoutView: View {
     }
 
     private func finishWorkout() {
-        // Sync notes from workout back to template for next time
-        for ex in state.exercises {
-            if let templateEx = state.template.exercises.first(where: { $0.exerciseId == ex.exerciseId }) {
-                templateEx.notes = ex.notes
-            }
-        }
-        let log = state.buildLog()
-        modelContext.insert(log)
-        try? modelContext.save()
-        state.stop()
         onFinish()
     }
 }
