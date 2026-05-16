@@ -78,4 +78,8 @@ enum ExerciseData {
     static func register(_ exercise: ExerciseInfo) {
         map[exercise.id] = exercise
     }
+
+    static func remove(id: String) {
+        map.removeValue(forKey: id)
+    }
 }
