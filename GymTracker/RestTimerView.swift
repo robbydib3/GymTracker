@@ -163,8 +163,26 @@ struct RestTimerView: View {
             }
         }
         .padding(20)
-        .background(Color.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .clipShape(
+            UnevenRoundedRectangle(
+                cornerRadii: RectangleCornerRadii(
+                    topLeading: 20, bottomLeading: 0,
+                    bottomTrailing: 0, topTrailing: 20
+                ),
+                style: .continuous
+            )
+        )
+        .background(
+            UnevenRoundedRectangle(
+                cornerRadii: RectangleCornerRadii(
+                    topLeading: 20, bottomLeading: 0,
+                    bottomTrailing: 0, topTrailing: 20
+                ),
+                style: .continuous
+            )
+            .fill(Color.cardBackground)
+            .ignoresSafeArea(edges: .bottom)
+        )
     }
 
     private func adjustButton(label: String, action: @escaping () -> Void) -> some View {
