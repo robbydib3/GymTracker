@@ -73,7 +73,12 @@ struct HomeView: View {
 
     @Query(sort: \WorkoutTemplate.createdAt) private var templates: [WorkoutTemplate]
     @Query(sort: \WorkoutLog.startedAt) private var logs: [WorkoutLog]
+    @Query private var profiles: [UserProfile]
     @AppStorage("gym_unit") private var unit = "kg"
+
+    @State private var showAccount = false
+
+    private var profile: UserProfile? { profiles.first }
 
     var body: some View {
         NavigationStack {
@@ -81,15 +86,45 @@ struct HomeView: View {
                 Color.appBackground.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
+                        greeting
                         quickStart
                         recentWorkouts
                     }
                     .padding()
                 }
             }
-            .navigationTitle("GymTracker")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showAccount = true } label: {
+                        AvatarCircleView(imageData: profile?.profileImageData, name: profile?.name ?? "")
+                            .frame(width: 34, height: 34)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .sheet(isPresented: $showAccount) {
+                AccountView()
+            }
         }
+    }
+
+    // MARK: Greeting
+
+    private var greeting: some View {
+        let name = profile?.name.trimmingCharacters(in: .whitespaces) ?? ""
+        return VStack(alignment: .leading, spacing: 2) {
+            Text(name.isEmpty ? "Welcome back!" : "Welcome back, \(name)!")
+                .font(.subheadline)
+                .italic()
+                .foregroundStyle(Color.textSecondary)
+            Text("GymTracker")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundStyle(Color.textPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: Quick start

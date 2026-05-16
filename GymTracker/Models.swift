@@ -152,6 +152,20 @@ final class LogSet {
     }
 }
 
+// MARK: - User profile
+
+@Model
+final class UserProfile {
+    var name: String = ""
+    var profileImageData: Data?
+    var memberSince: Date = Date()
+
+    init(name: String = "", memberSince: Date = .now) {
+        self.name = name
+        self.memberSince = memberSince
+    }
+}
+
 // MARK: - Custom exercise
 
 @Model
